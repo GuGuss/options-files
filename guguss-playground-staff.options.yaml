@@ -1,0 +1,16 @@
+version: 1
+regions:
+  exclude:
+    - fr-3.platform.sh
+    - fr-4.platform.sh
+    - us-3.platform.sh
+plans:
+  exclude:
+    - development
+enforced:
+  settings:
+    cron_minimum_interval: 1
+    enforce_mfa: true
+  capabilities:
+    source_operations:
+      enabled: true
