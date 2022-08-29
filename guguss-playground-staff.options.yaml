@@ -1,16 +1,103 @@
 version: 1
+initialize:
+# The HTTP Git URL to the repository to be cloned.
+  repository: git://github.com/platformsh-templates/micronaut.git@master
+  config: null
+  files: []
+# Define which regions are available or not (use only/exclude/additional): 
+# additional: this adds regions not in the default list, making them accessible to the organization for this project/checkout
+# only: This key overrides the list provided by the defaults + the additional key, but does not permit access to any excluded regions. 
+# exclude: Removes regions from the list and blocks them from being used for this project.
 regions:
-  exclude:
-    - fr-3.platform.sh
-    - fr-4.platform.sh
-    - us-3.platform.sh
+  additional:
+    - bc.platform.sh
+  only:
+    - us.platform.sh
+    - eu.platform.sh
+  exclude: 
+    - us-2.platform.sh
+    - au.platform.sh
+    - eu-2.platform.sh
+    - nl-1.platform.sh
+# Define which plans are available or not (use only/exclude/additional). It behaves as regions above
 plans:
   exclude:
     - development
+    - small
+  additional:
+    - 2xlarge
+    - xlarge
+  only:
+    - development
+    - standard
+    - medium
+    - large
+# The default key allows the YAML file to make additional changes to the project after it has been provisioned 
+# but before the subscription is marked as active.
+defaults:
+  # Allows to set user access list for a project
+  access:
+    - user: [UUID HERE]
+      role: admin
+    - user: [UUID HERE]
+      role: viewer
+    - email: [EMAIL HERE]
+      role: admin
+  # Variables key goes directly to the appropriate git endpoint
+  variables:
+    - name: env:COMPOSER_AUTH
+      value: ""
+      is_json: false
+      visible_build: true
+      visible_runtime: false
+    - name: drupal7:site_name
+      value: "Hello, world!"
+      is_json: false
+      visible_build: false
+      visible_runtime: true
+  # Settings key goes directly to the appropriate git endpoint
+  settings:
+      enable_certificate_provisioning: TRUE
+      product_name: "Platform Internals"
+      product_code: "internal"
+      bot_email: "accounts@platform.sh"
+      application_config_file: ".platform.app.yaml"
+      project_config_dir: ".platform"
+      variables_prefix: "PLATFORM_"
+      development_domain_template: "{region}-{project}-{environment}.mydomain.com"
+  # Capabilities key goes directly to the appropriate git endpoint
+  capabilities:
+      integrations:
+        enabled: false
+        allowed_integrations: []
+# Enforced values for settings, variables, capabilities, and access which should be applied to the project.
 enforced:
   settings:
     cron_minimum_interval: 1
     enforce_mfa: true
+    data_retention:
+      production:
+        max_backups: 5
+        default_config:
+          manual_count: 2
+          schedule:
+            - interval: 1d
+              count: 3
+      development:
+        max_backups: 2
+        default_config:
+          manual_count: 2
+          schedule:[]
   capabilities:
     source_operations:
       enabled: true
+# Customized billing settings and allows to restrict image_types and set resources per environment type
+billing:
+  resources:
+    production:
+      max_cpu: 4
+      max_memory: 2048
+      max_environments: 1
+    development:
+      max_cpu: 2
+    max_memory: 1024
